@@ -15,6 +15,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        Place::factory(10)->create();
+        $this->call(PlacesSeeder::class);
     }
 }
