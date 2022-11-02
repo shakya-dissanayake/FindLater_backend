@@ -52,7 +52,6 @@ class PlaceController extends Controller
                 'by_public_transport' => $data[2]
             ]
         ));
-
         return new PlaceResource($place);
     }
 
@@ -99,7 +98,35 @@ class PlaceController extends Controller
             ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
             ->get('https://api.radar.io/v1/geocode/reverse', ['coordinates' => $coordinates]);
 
-        return json_decode($response->body())->addresses[0]->state;
+        $state = json_decode($response->body())->addresses[0]->state;
+        $states = collect([
+            'Ampara' => 'Eastern Province',
+            'Anuradhapura' => 'North Central Province',
+            'Badulla' => 'Uva Province',
+            'Batticaloa' => 'Eastern Province',
+            'Colombo' => 'Western Province',
+            'Galle' => 'Southern Province',
+            'Gampaha' => 'Western Province',
+            'Hambantota' => 'Southern Province',
+            'Jaffna' => 'Northern Province',
+            'Kalutara' => 'Western Province',
+            'Kandy' => 'Central Province',
+            'Kegalle' => 'Sabaragamuwa Province',
+            'Kilinochchi' => 'Northern Province',
+            'Kurunegala' => 'North Western Province',
+            'Mannar' => 'Northern Province',
+            'Matale' => 'Central Province',
+            'Matara' => 'Southern Province',
+            'Monaragala' => 'Uva Province',
+            'Mullaitivu' => 'Northern Province',
+            'Nuwara Eliya' => 'Central Province',
+            'Polonnaruwa' => 'North Central Province',
+            'Puttalam' => 'North Western Province',
+            'Ratnapura' => 'Sabaragamuwa Province',
+            'Trincomalee' => 'Eastern Province',
+            'Vavuniya' => 'Northern Province',
+        ]);
+        return $states[$state];
     }
 
     protected function getValues($coordinatesO, $coordinates)
