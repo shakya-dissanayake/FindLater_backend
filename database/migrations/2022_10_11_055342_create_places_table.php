@@ -20,8 +20,7 @@ return new class extends Migration
             $table->boolean('is_favourite')->default('0');
             $table->string('description')->default('N/A');
             $table->string('image')->default('Empty');
-            $table->string('latitude');
-            $table->string('longitude');
+            $table->string('coordinates');
             $table->string('province');
             $table->string('address')->default('N/A');
             $table->string('distance')->default('N/A');
