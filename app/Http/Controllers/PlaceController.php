@@ -8,10 +8,12 @@ use App\Models\Place;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class PlaceController extends Controller
 {
     use HttpResponses;
+
     /**
      * Display a listing of the resource.
      *
@@ -33,6 +35,7 @@ class PlaceController extends Controller
     public function store(StorePlaceRequest $request)
     {
         $request->validated($request->all());
+        $data = $this->getValues($request->latitudeO, $request->longitudeO, $request->latitude, $request->longitude);
 
         $place = Place::create(array_filter(
             [
@@ -43,11 +46,11 @@ class PlaceController extends Controller
                 'image' => $request->image,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
-                'province' => $request->province,
+                'province' => $this->getProvince($request->latitude, $request->longitude),
                 'address' => $request->address,
-                'distance' => $request->distance,
-                'by_car' => $request->by_car,
-                'by_public_transport' => $request->by_public_transport
+                'distance' => $data[0],
+                'by_car' => $data[1],
+                'by_public_transport' => $data[2]
             ]
         ));
 
@@ -62,7 +65,7 @@ class PlaceController extends Controller
      */
     public function show(Place $place)
     {
-        if (Auth::user()->id !== $place->user_id){
+        if (Auth::user()->id !== $place->user_id) {
             return $this->error('', 'Not Authorized!', 403);
         }
 
@@ -90,5 +93,81 @@ class PlaceController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    protected function getProvince($latitude, $longitude)
+    {
+        $response = Http::withOptions(['verify' => false])
+            ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
+            ->get('https://api.radar.io/v1/geocode/reverse', ['coordinates' => $latitude . ',' . $longitude]);
+
+        return json_decode($response->body())->addresses[0]->state;
+    }
+
+    protected function getValues($latitudeO, $longitudeO, $latitudeD, $longitudeD)
+    {
+        $response = Http::withOptions(['verify' => false])
+            ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
+            ->get('https://api.radar.io/v1/route/distance', [
+                'origin' => $latitudeO . ',' . $longitudeO,
+                'destination' => $latitudeD . ',' . $longitudeD,
+                'modes' => 'car,bike',
+                'units' => 'metric'
+            ]);
+
+        if (json_decode($response->body())->meta->code == 400) {
+            $response = Http::withOptions(['verify' => false])
+                ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
+                ->get('https://api.radar.io/v1/route/distance', [
+                    'origin' => $latitudeO . ',' . $longitudeO,
+                    'destination' => $latitudeD . ',' . $longitudeD,
+                    'modes' => 'car',
+                    'units' => 'metric'
+                ]);
+
+            if (json_decode($response->body())->meta->code == 400) {
+                $response = Http::withOptions(['verify' => false])
+                    ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
+                    ->get('https://api.radar.io/v1/route/distance', [
+                        'origin' => $latitudeO . ',' . $longitudeO,
+                        'destination' => $latitudeD . ',' . $longitudeD,
+                        'units' => 'metric'
+                    ]);
+
+                if (json_decode($response->body())->meta->code == 400) {
+                    $response = Http::withOptions(['verify' => false])
+                        ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
+                        ->get('https://api.radar.io/v1/route/distance', [
+                            'origin' => $latitudeO . ',' . $longitudeO,
+                            'destination' => $latitudeD . ',' . $longitudeD,
+                            'units' => 'metric'
+                        ]);
+                    if (json_decode($response->body())->meta->code == 400) {
+                        $response = Http::withOptions(['verify' => false])
+                            ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
+                            ->get('https://api.radar.io/v1/route/distance', [
+                                'origin' => $latitudeO . ',' . $longitudeO,
+                                'destination' => $latitudeD . ',' . $longitudeD,
+                                'units' => 'metric'
+                            ]);
+                        return ['N/A', 'N/A', 'N/A'];
+                    } else {
+                        return [json_decode($response->body())->routes->geodesic->distance->text,
+                            'N/A', 'N/A'];
+                    }
+                } else {
+                    return [json_decode($response->body())->routes->car->distance->text,
+                        'N/A', 'N/A'];
+                }
+            } else {
+                return [json_decode($response->body())->routes->car->distance->text,
+                    json_decode($response->body())->routes->car->duration->text,
+                    'N/A'];
+            }
+        } else {
+            return [json_decode($response->body())->routes->car->distance->text,
+                json_decode($response->body())->routes->car->duration->text,
+                json_decode($response->body())->routes->bike->duration->text];
+        }
     }
 }
