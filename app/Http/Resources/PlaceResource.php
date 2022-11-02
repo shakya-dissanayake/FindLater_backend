@@ -16,11 +16,11 @@ class PlaceResource extends JsonResource
     {
         return [
             'id' => (String)$this->id,
-            'attribures' => [
-                'image' => $this->image,
+            'attributes' => [
                 'name' => $this->name,
-                'description' => $this->description,
                 'is_favourite' => (String)$this->is_favourite,
+                'description' => $this->description,
+                'image' => $this->image,
                 'latitude' => $this->latitude,
                 'longitude' => $this->longitude,
                 'province' => $this->province,
@@ -28,7 +28,11 @@ class PlaceResource extends JsonResource
                 'distance' => $this->distance,
                 'by_car' => $this->by_car,
                 'by_public_transport' => $this->by_public_transport,
+                'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at
+            ],
+            'relationships' => [
+                'user_id' => $this->user_id
             ]
         ];
     }

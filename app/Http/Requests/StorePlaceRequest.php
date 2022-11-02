@@ -22,13 +22,12 @@ class StorePlaceRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    #[ArrayShape(['name' => "string[]", 'latitude' => "string[]", 'longitude' => "string[]", 'province' => "string[]"])] public function rules(): array
+    #[ArrayShape(['name' => "string[]", 'latitude' => "string[]", 'longitude' => "string[]"])] public function rules(): array
     {
         return [
             'name' => ['required', 'max:255'],
             'latitude' => ['required', 'max:20'],
             'longitude' => ['required', 'max:20'],
-            'province' => ['required', 'max:50']
         ];
     }
 }
