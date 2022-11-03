@@ -18,10 +18,6 @@ class AuthController extends Controller
     {
         $request->validated($request->all());
 
-        if (!Auth::attempt($request->only(['email', 'password']))){
-            return $this->error('', 'credentials do not match.', 401);
-        }
-
         $user = User::where('email', $request->email)->first();
 
         return $this->success([
@@ -38,7 +34,6 @@ class AuthController extends Controller
             [
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
             ]
         );
         return $this->success([

@@ -49,7 +49,7 @@ class PlaceController extends Controller
                 'address' => $request->address,
                 'distance' => $data[0],
                 'by_car' => $data[1],
-                'by_public_transport' => $data[2]
+                'by_bike' => $data[2]
             ]
         ));
         return new PlaceResource($place);
@@ -59,14 +59,15 @@ class PlaceController extends Controller
      * Display the specified resource.
      *
      * @param int $id
-     * @return PlaceResource
      */
     public function show(Place $place)
     {
         if (Auth::user()->id !== $place->user_id) {
             return $this->error('', 'Not Authorized!', 403);
         }
+
         return new PlaceResource($place);
+
     }
 
     /**
@@ -74,11 +75,17 @@ class PlaceController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Place $place)
     {
-        //
+        if (Auth::user()->id !== $place->user_id) {
+            return $this->error('', 'Not Authorized!', 403);
+        }
+
+        $place->update($request->all());
+
+        return new PlaceResource($place);
+
     }
 
     /**
@@ -87,10 +94,12 @@ class PlaceController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Place $place)
     {
-        //
+        $place->delete();
+        return response(null, 204);
     }
+
 
     protected function getProvince($coordinates)
     {

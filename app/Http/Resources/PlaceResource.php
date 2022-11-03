@@ -26,7 +26,7 @@ class PlaceResource extends JsonResource
                 'address' => $this->address,
                 'distance' => $this->distance,
                 'by_car' => $this->by_car,
-                'by_public_transport' => $this->by_public_transport,
+                'by_bike' => $this->by_bike,
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at
             ],

@@ -20,7 +20,7 @@ class Place extends Model
         'address',
         'distance',
         'by_car',
-        'by_public_transport',
+        'by_bike',
     ];
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
