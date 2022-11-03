@@ -6,6 +6,7 @@ use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Traits\HttpResponses;
 use App\Models\User;
+use http\Env\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -22,7 +23,7 @@ class AuthController extends Controller
 
         return $this->success([
             'user' => $user,
-            'token' => $user->createToken('API Token of' . $user->name)->plainTextToken
+            'token' => $user->createToken('API Token of ' . $user->name)->plainTextToken
         ]);
     }
 
@@ -38,12 +39,15 @@ class AuthController extends Controller
         );
         return $this->success([
             'user' => $user,
-            'token' => $user->createToken('API Token of' . $user->name)->plainTextToken
+            'token' => $user->createToken('API Token of ' . $user->name)->plainTextToken
         ]);
     }
 
-    public function logout()
+    public function logout(Request $request): \Illuminate\Http\JsonResponse
     {
-        return response()->json('Logout');
+        Auth::user()->currentAccessToken()->delete();
+        return $this->success([
+            'message' => 'Successfully logged out!'
+        ]);
     }
 }
