@@ -23,13 +23,12 @@ class StoreUserRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    #[ArrayShape(['name' => "string[]", 'email' => "string[]", 'password' => "string[]"])]
+    #[ArrayShape(['name' => "string[]", 'email' => "string[]"])]
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'email' => ['required', 'string', 'max:255', 'unique:users']
         ];
     }
 }

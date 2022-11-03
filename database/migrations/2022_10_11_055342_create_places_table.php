@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('address')->default('N/A');
             $table->string('distance')->default('N/A');
             $table->string('by_car')->default('N/A');
-            $table->string('by_public_transport')->default('N/A');
+            $table->string('by_bike')->default('N/A');
             $table->timestamps();
         });
     }

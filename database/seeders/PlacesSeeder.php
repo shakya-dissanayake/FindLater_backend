@@ -27,7 +27,7 @@ class PlacesSeeder extends Seeder
                 'address' => 'OUSL, Akuressa Road, Matara.',
                 'distance' => '1.0 km',
                 'by_car' => '0 hr 4',
-                'by_public_transport' => 'N/A',
+                'by_bike' => 'N/A',
             ],
             [
                 'user_id' => 2,
@@ -40,7 +40,7 @@ class PlacesSeeder extends Seeder
                 'address' => 'OUSL, Akuressa Road, Matara.',
                 'distance' => '156 km',
                 'by_car' => '2 hr 19',
-                'by_public_transport' => '3 hr 9',
+                'by_bike' => '3 hr 9',
             ],
             [
                 'user_id' => 1,
@@ -53,7 +53,7 @@ class PlacesSeeder extends Seeder
                 'address' => 'IFS Sri Lanka Office, Colombo',
                 'distance' => '156 km',
                 'by_car' => '2 hr 19',
-                'by_public_transport' => '3 hr 9',
+                'by_bike' => '3 hr 9',
             ]
         ];
 

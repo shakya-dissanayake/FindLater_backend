@@ -49,7 +49,7 @@ class PlaceController extends Controller
                 'address' => $request->address,
                 'distance' => $data[0],
                 'by_car' => $data[1],
-                'by_public_transport' => $data[2]
+                'by_bike' => $data[2]
             ]
         ));
         return new PlaceResource($place);
@@ -59,14 +59,11 @@ class PlaceController extends Controller
      * Display the specified resource.
      *
      * @param int $id
-     * @return PlaceResource
      */
     public function show(Place $place)
     {
-        if (Auth::user()->id !== $place->user_id) {
-            return $this->error('', 'Not Authorized!', 403);
-        }
-        return new PlaceResource($place);
+        return $this->isNotAuthorized($place) ? $this->isNotAuthorized($place) : new PlaceResource($place);
+
     }
 
     /**
@@ -74,29 +71,41 @@ class PlaceController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Place $place)
     {
-        //
+        if (Auth::user()->id !== $place->user_id) {
+            return $this->error('', 'Not Authorized!', 403);
+        }
+
+        $place->update($request->all());
+        return new PlaceResource($place);
+
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Place $place)
     {
-        //
+        return $this->isNotAuthorized($place) ? $this->isNotAuthorized($place) : $place->delete();
     }
 
+    // check the whether the user authorized to perform the action
+    private function isNotAuthorized($place){
+        if (Auth::user()->id !== $place->user_id) {
+            return $this->error('', 'Not Authorized!', 403);
+        }
+    }
+
+    // Distance API implementations
     protected function getProvince($coordinates)
     {
         $response = Http::withOptions(['verify' => false])
-            ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
-            ->get('https://api.radar.io/v1/geocode/reverse', ['coordinates' => $coordinates]);
+            ->withHeaders(['Authorization' => env('RADAR_AUTH_TOKEN')])
+            ->get(env('RADAR_BASE_URL').'/geocode/reverse', ['coordinates' => $coordinates]);
 
         $state = json_decode($response->body())->addresses[0]->state;
         $states = collect([
@@ -132,8 +141,8 @@ class PlaceController extends Controller
     protected function getValues($coordinatesO, $coordinates)
     {
         $response = Http::withOptions(['verify' => false])
-            ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
-            ->get('https://api.radar.io/v1/route/distance', [
+            ->withHeaders(['Authorization' => env('RADAR_AUTH_TOKEN')])
+            ->get(env('RADAR_BASE_URL').'/route/distance', [
                 'origin' => $coordinatesO,
                 'destination' => $coordinates,
                 'modes' => 'car,bike',
@@ -142,8 +151,8 @@ class PlaceController extends Controller
 
         if (json_decode($response->body())->meta->code == 400) {
             $response = Http::withOptions(['verify' => false])
-                ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
-                ->get('https://api.radar.io/v1/route/distance', [
+                ->withHeaders(['Authorization' => env('RADAR_AUTH_TOKEN')])
+                ->get(env('RADAR_BASE_URL').'/route/distance', [
                     'origin' => $coordinatesO,
                     'destination' => $coordinates,
                     'modes' => 'car',
@@ -152,8 +161,8 @@ class PlaceController extends Controller
 
             if (json_decode($response->body())->meta->code == 400) {
                 $response = Http::withOptions(['verify' => false])
-                    ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
-                    ->get('https://api.radar.io/v1/route/distance', [
+                    ->withHeaders(['Authorization' => env('RADAR_AUTH_TOKEN')])
+                    ->get(env('RADAR_BASE_URL').'/route/distance', [
                         'origin' => $coordinatesO,
                         'destination' => $coordinates,
                         'units' => 'metric'
@@ -161,16 +170,16 @@ class PlaceController extends Controller
 
                 if (json_decode($response->body())->meta->code == 400) {
                     $response = Http::withOptions(['verify' => false])
-                        ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
-                        ->get('https://api.radar.io/v1/route/distance', [
+                        ->withHeaders(['Authorization' => env('RADAR_AUTH_TOKEN')])
+                        ->get(env('RADAR_BASE_URL').'/route/distance', [
                             'origin' => $coordinatesO,
                             'destination' => $coordinates,
                             'units' => 'metric'
                         ]);
                     if (json_decode($response->body())->meta->code == 400) {
                         $response = Http::withOptions(['verify' => false])
-                            ->withHeaders(['Authorization' => 'prj_test_sk_f5eb01e5d699467b8f00a91d0fc4e991e75212a3'])
-                            ->get('https://api.radar.io/v1/route/distance', [
+                            ->withHeaders(['Authorization' => env('RADAR_AUTH_TOKEN')])
+                            ->get(env('RADAR_BASE_URL').'/route/distance', [
                                 'origin' => $coordinatesO,
                                 'destination' => $coordinates,
                                 'units' => 'metric'

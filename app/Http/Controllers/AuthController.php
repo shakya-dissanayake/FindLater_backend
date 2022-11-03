@@ -6,8 +6,8 @@ use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Traits\HttpResponses;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -18,15 +18,11 @@ class AuthController extends Controller
     {
         $request->validated($request->all());
 
-        if (!Auth::attempt($request->only(['email', 'password']))){
-            return $this->error('', 'credentials do not match.', 401);
-        }
-
         $user = User::where('email', $request->email)->first();
 
         return $this->success([
             'user' => $user,
-            'token' => $user->createToken('API Token of' . $user->name)->plainTextToken
+            'token' => $user->createToken('API Token of ' . $user->name)->plainTextToken
         ]);
     }
 
@@ -38,17 +34,11 @@ class AuthController extends Controller
             [
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
             ]
         );
         return $this->success([
             'user' => $user,
-            'token' => $user->createToken('API Token of' . $user->name)->plainTextToken
+            'token' => $user->createToken('API Token of ' . $user->name)->plainTextToken
         ]);
-    }
-
-    public function logout()
-    {
-        return response()->json('Logout');
     }
 }
