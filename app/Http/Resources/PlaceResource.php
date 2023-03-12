@@ -14,6 +14,8 @@ class PlaceResource extends JsonResource
      */
     public function toArray($request)
     {
+        $is_favourite = $request->query('is_favourite');
+
         return [
             'id' => (String)$this->id,
             'attributes' => [

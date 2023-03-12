@@ -19,11 +19,18 @@ class PlaceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return PlaceResource::collection(
-            Place::where('user_id', Auth::user()->id)->get()
-        )->groupBY('province');
+        $is_favourite = $request->query('is_favourite');
+        if ($is_favourite) {
+            return PlaceResource::collection(
+                Place::where('user_id', Auth::user()->id)->where('is_favourite', "1")->get()
+            )->groupBY('province');
+        } else {
+            return PlaceResource::collection(
+                Place::where('user_id', Auth::user()->id)->get()
+            )->groupBY('province');
+        }
     }
 
     /**
@@ -100,7 +107,7 @@ class PlaceController extends Controller
         }
     }
 
-    // Distance API implementations
+    // Geocoding API implementation
     protected function getProvince($coordinates)
     {
         $response = Http::withOptions(['verify' => false])
@@ -138,7 +145,8 @@ class PlaceController extends Controller
         return $states[$state];
     }
 
-    protected function getValues($coordinatesO, $coordinates)
+    // Distance API implementation
+    protected function getValues($coordinatesO, $coordinates): array
     {
         $response = Http::withOptions(['verify' => false])
             ->withHeaders(['Authorization' => env('RADAR_AUTH_TOKEN')])

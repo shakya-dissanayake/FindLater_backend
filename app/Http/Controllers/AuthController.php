@@ -6,8 +6,6 @@ use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Traits\HttpResponses;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
